@@ -12,6 +12,8 @@ public class CheckpointManager : MonoBehaviour
 
     public Checkpoint GetLastCheckpointThatWasPassed()
     {
-        return checkpoints.Last(c => c.Passed);
+        Checkpoint checkpoint = checkpoints.LastOrDefault(c => c.Passed);
+        checkpoint = checkpoint ?? checkpoints[0];
+        return checkpoint;
     }
 }
