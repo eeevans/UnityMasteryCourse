@@ -7,12 +7,14 @@ public class Walker : MonoBehaviour
     [SerializeField] float speed = 0.25f;
     Collider2D _collider;
     Rigidbody2D _rigidBody;
+    private SpriteRenderer _renderer;
     Vector2 _direction = Vector2.left;
 
     void Awake()
     {
         _collider = GetComponent<Collider2D>();
         _rigidBody = GetComponent<Rigidbody2D>();
+        _renderer = GetComponent<SpriteRenderer>();
     }
 
     // Update is called once per frame
@@ -44,5 +46,6 @@ public class Walker : MonoBehaviour
     private void SwitchDirection()
     {
         _direction *= Negative_Direction;
+        _renderer.flipX = !_renderer.flipX;
     }
 }
