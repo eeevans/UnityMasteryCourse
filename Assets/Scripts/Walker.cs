@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class Walker : MonoBehaviour
@@ -25,22 +26,46 @@ public class Walker : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (ReachedEdge())
+        if (ReachedEdge() || CollideWithNonPlayerObject())
             SwitchDirection();
+    }
+
+    private bool CollideWithNonPlayerObject()
+    {
+        float x = GetForwardX();
+        float y = transform.position.y;
+
+        Vector2 origin = new Vector2(x, y);
+
+        var hit = Physics2D.Raycast(origin, _direction, Small_Distance);
+
+        return CollisionWithNonPlayerOrNonCheckpointDetected(hit);
+    }
+
+    private static bool CollisionWithNonPlayerOrNonCheckpointDetected(RaycastHit2D hit)
+    {
+        return !(hit.CollisionNotDetected() || 
+            hit.CollidedWithCheckpoint() || 
+            hit.CollidedWithPlayer());
     }
 
     private bool ReachedEdge()
     {
-        float x = _direction.x == Negative_Direction ?  
-            _collider.bounds.min.x - Small_Distance : 
-            _collider.bounds.max.x + Small_Distance;
+        float x = GetForwardX();
         float y = _collider.bounds.min.y;
 
         Vector2 origin = new Vector2(x, y);
 
         var hit = Physics2D.Raycast(origin, Vector2.down, Small_Distance);
-        
+
         return hit.collider == null;
+    }
+
+    private float GetForwardX()
+    {
+        return _direction.x == Negative_Direction ?
+            _collider.bounds.min.x - Small_Distance :
+            _collider.bounds.max.x + Small_Distance;
     }
 
     private void SwitchDirection()
@@ -49,3 +74,23 @@ public class Walker : MonoBehaviour
         _renderer.flipX = !_renderer.flipX;
     }
 }
+
+public static class RaycastHit2DExtensions
+{
+    public static bool CollisionNotDetected(this RaycastHit2D hit)
+    {
+        return hit.collider is null;
+    }
+
+    public static bool CollidedWithCheckpoint(this RaycastHit2D hit)
+    {
+        return hit.collider.isTrigger;
+    }
+
+    public static bool CollidedWithPlayer(this RaycastHit2D hit)
+    {
+        return !(hit.collider.GetComponent<PlayerMovement>() is null);
+    }
+
+}
+
