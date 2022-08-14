@@ -4,17 +4,16 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerMovement : MonoBehaviour, IMove
 {
+    public float Speed { get; private set; }
+    public float Direction { get; private set; }
+
     [SerializeField] float moveSpeed = 2;
     [SerializeField] private float jumpForce = 100;
     Rigidbody2D rb = null;
 
     IGround characterGrounding;
-    private bool isJumping;
     private bool fire;
     private float horizontal;
-
-    public float Speed { get; private set; }
-    public float Direction { get; private set; }
 
     private void Awake()
     {
@@ -45,8 +44,8 @@ public class PlayerMovement : MonoBehaviour, IMove
     private void HandleJump()
     {
         var isGrounded = characterGrounding.IsGrounded;
-        isJumping = !isGrounded;
-        fire = Input.GetKey(KeyCode.Space);
+
+        fire = Input.GetKeyDown(KeyCode.Space);
         if (CanJump(isGrounded))
         {
             PlayerJump();
@@ -55,13 +54,18 @@ public class PlayerMovement : MonoBehaviour, IMove
 
     private bool CanJump(bool isGrounded)
     {
-        return fire && isGrounded && !isJumping;
+        return fire && isGrounded;
     }
 
     private void PlayerJump()
     {
-        isJumping = true;
         rb.AddForce(Vector2.up * jumpForce);
+        if (characterGrounding.GroundedDirection != Vector2.down)
+            rb.AddForce(characterGrounding.GroundedDirection * -1f * jumpForce);
     }
 
+    public void Bounce()
+    {
+        PlayerJump();
+    }
 }

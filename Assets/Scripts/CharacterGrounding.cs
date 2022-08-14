@@ -2,21 +2,24 @@ using UnityEngine;
 
 public class CharacterGrounding : MonoBehaviour, IGround
 {
-    [SerializeField] Transform leftFoot;
-    [SerializeField] Transform rightFoot;
+    [SerializeField] Transform[] _positions;
     [SerializeField] private float maxDistance;
     [SerializeField] private LayerMask layerMask;
 
     public bool IsGrounded { get; private set; }
+    public Vector2 GroundedDirection { get; private set; }
 
     private Transform groundedObject;
     private Vector3? groundedObjectLastPosition;
 
     private void Update()
     {
-        CheckFootForGrounding(leftFoot);
-        if (!IsGrounded)
-            CheckFootForGrounding(rightFoot);
+        foreach (var position in _positions)
+        {
+            CheckFootForGrounding(position);
+            if (IsGrounded)
+                break;
+        }
 
         StickToMovingObjects();
     }
@@ -42,8 +45,24 @@ public class CharacterGrounding : MonoBehaviour, IGround
 
     private void CheckFootForGrounding(Transform foot)
     {
-        var raycastHit = Physics2D.Raycast(foot.position, Vector2.down, maxDistance, layerMask);
+        var raycastHit = Physics2D.Raycast(foot.position, foot.forward, maxDistance, layerMask);
         IsGrounded = !(raycastHit.collider is null);
+        GroundedDirection = raycastHit.collider != null ? foot.forward : Vector3.zero;
+
+        if (GroundedOnNewObject(raycastHit.collider?.transform))
+            RememberNewObject(raycastHit.collider.transform);
+
         groundedObject = raycastHit.collider?.transform;
+
+    }
+
+    private void RememberNewObject(Transform transform)
+    {
+        groundedObjectLastPosition = transform.position;
+    }
+
+    private bool GroundedOnNewObject(Transform item)
+    {
+        return IsGrounded && groundedObject != item;
     }
 }

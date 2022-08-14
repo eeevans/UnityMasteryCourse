@@ -3,10 +3,12 @@ using UnityEngine;
 
 public class Walker : MonoBehaviour
 {
+    [SerializeField] float speed = 0.25f;
+    [SerializeField] GameObject _spawnOnStompPrefab;
+
+    Collider2D _collider;
     private const float Small_Distance = 0.1f;
     private const float Negative_Direction = -1f;
-    [SerializeField] float speed = 0.25f;
-    Collider2D _collider;
     Rigidbody2D _rigidBody;
     private SpriteRenderer _renderer;
     Vector2 _direction = Vector2.left;
@@ -16,6 +18,29 @@ public class Walker : MonoBehaviour
         _collider = GetComponent<Collider2D>();
         _rigidBody = GetComponent<Rigidbody2D>();
         _renderer = GetComponent<SpriteRenderer>();
+    }
+
+    private void OnCollisionEnter2D(Collision2D target)
+    {
+        if (target.WasHitByPlayer())
+        {
+            if (target.WasHitFromTop())
+            {
+                HandleWalkerStomped(target.collider.GetComponent<PlayerMovement>());
+            }
+            else
+            {
+                GameManager.Instance.KillPlayer();
+            }
+        }
+    }
+
+    private void HandleWalkerStomped(PlayerMovement playerMovement)
+    {
+        if (_spawnOnStompPrefab != null)
+            Instantiate(_spawnOnStompPrefab, transform.position, transform.rotation);
+        playerMovement.Bounce();
+        Destroy(gameObject);
     }
 
     // Update is called once per frame
