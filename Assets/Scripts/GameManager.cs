@@ -11,6 +11,22 @@ public class GameManager : MonoBehaviour
     public event Action<int> OnLivesChanged;
     public event Action<int> OnCoinsChanged;
 
+    public int _currentLevelIndex;
+
+    public void MoveToNextLevel()
+    {
+        _currentLevelIndex = IncrementAndCheckForLastScene(_currentLevelIndex);
+        SceneManager.LoadScene(_currentLevelIndex);
+    }
+
+    private int IncrementAndCheckForLastScene(int currentLevelIndex)
+    {
+        var nextScene = currentLevelIndex + 1;
+        var indexOfLastScene = SceneManager.sceneCount;
+        nextScene %= indexOfLastScene;
+        return nextScene;
+    }
+
     public void AddCoin()
     {
         _coins++;
