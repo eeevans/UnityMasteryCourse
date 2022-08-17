@@ -22,7 +22,7 @@ public class GameManager : MonoBehaviour
     private int IncrementAndCheckForLastScene(int currentLevelIndex)
     {
         var nextScene = currentLevelIndex + 1;
-        var indexOfLastScene = SceneManager.sceneCount;
+        var indexOfLastScene = SceneManager.sceneCountInBuildSettings;
         nextScene %= indexOfLastScene;
         return nextScene;
     }
@@ -61,16 +61,21 @@ public class GameManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-
-            RestartGame();
+            ResetGameValues();
         }
     }
 
     private void RestartGame()
     {
+        ResetGameValues();
+        SceneManager.LoadScene(0);
+    }
+
+    private void ResetGameValues()
+    {
         _coins = 0;
         _lives = 3;
-        SceneManager.LoadScene(0);
+        _currentLevelIndex = 0;
     }
 
     private int _lives;
